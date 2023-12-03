@@ -1,0 +1,31 @@
+version: '3.7'
+
+services:
+    stop.dev:
+        container_name: stop.dev
+        restart: always
+        build:
+            context: ./
+            dockerfile: Dockerfile
+            args:
+                APP_ENV: ${APP_ENV}
+                XDEBUG_MODE: ${XDEBUG_MODE}
+                XDEBUG_IDEKEY: ${XDEBUG_IDEKEY}
+                XDEBUG_HANDLER: ${XDEBUG_HANDLER}
+        volumes:
+            - ./:/app
+
+    nginx:
+        container_name: nginx
+        build: docker/nginx
+        restart: always
+        ports:
+            - "8001:80"
+        volumes:
+            - ./:/app
+        depends_on:
+            - stop.dev
+
+networks:
+    bubble:
+        external: true
