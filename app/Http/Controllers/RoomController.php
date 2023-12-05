@@ -20,9 +20,12 @@ class RoomController extends Controller
     public function joinRoom($pin, $user): JsonResponse
     {
         $room = Room::where(['pin' => (int) $pin])->first();
-        $created = User::create(['room_id' => $room->id, 'name' => $user]);
-        JoinRoomMessage::dispatch($user, $pin);
-        return response()->json($created);
+        if(!is_null($room)) {
+            $created = User::create(['room_id' => $room->id, 'name' => $user]);
+            JoinRoomMessage::dispatch($user, $pin);
+            return response()->json($created);
+        }
+        return response()->json(['message' => 'Sala não encontrada']);
     }
 
     public function stop($user): JsonResponse
