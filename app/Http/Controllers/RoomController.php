@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Events\JoinRoomMessage;
 use App\Events\StopMessage;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Session;
 
 class RoomController extends Controller
 {
@@ -17,11 +16,8 @@ class RoomController extends Controller
 
     public function joinRoom($pin, $user): JsonResponse
     {
-        if (isset($this->rooms[$pin])) {
-            JoinRoomMessage::dispatch($user, $pin);
-            return response()->json(['pin' => $pin, 'users' => $this->rooms[$pin]['users']]);
-        }
-        return response()->json(['error' => 'Sala não encontrada'], 404);
+        JoinRoomMessage::dispatch($user, $pin);
+        return response()->json(['pin' => $pin, 'users' => $user);
     }
 
     public function stop($user): JsonResponse
