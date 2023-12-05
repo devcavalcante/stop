@@ -13,7 +13,7 @@
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "true",
-        "SESSION_DRIVER": "file",
+        "SESSION_DRIVER": "array",
         "SESSION_LIFETIME": "3600" ,
         "APP_URL": "https://stop-english.com",
 
