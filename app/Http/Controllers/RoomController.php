@@ -17,7 +17,7 @@ class RoomController extends Controller
     public function joinRoom($pin, $user): JsonResponse
     {
         JoinRoomMessage::dispatch($user, $pin);
-        return response()->json(['pin' => $pin, 'users' => $user);
+        return response()->json(['pin' => $pin, 'users' => $user]);
     }
 
     public function stop($user): JsonResponse
