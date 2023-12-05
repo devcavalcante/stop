@@ -9,22 +9,15 @@ use Illuminate\Support\Facades\Session;
 
 class RoomController extends Controller
 {
-    private array $rooms = [];
-
     public function createRoom(): JsonResponse
     {
         $pin = $this->generatePin();
-        $this->rooms[$pin] = ['users' => []];
-        Session::put('rooms', $this->rooms);
         return response()->json(['pin' => $pin]);
     }
 
     public function joinRoom($pin, $user): JsonResponse
     {
-        $this->rooms = Session::get('rooms', []);
         if (isset($this->rooms[$pin])) {
-            $this->rooms[$pin]['users'][] = $user;
-            Session::put('rooms', $this->rooms);
             JoinRoomMessage::dispatch($user, $pin);
             return response()->json(['pin' => $pin, 'users' => $this->rooms[$pin]['users']]);
         }
