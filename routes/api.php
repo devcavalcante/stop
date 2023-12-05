@@ -17,8 +17,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('result', [CategoryController::class, 'result']);
-Route::get('random', [CategoryController::class, 'generateLetter']);
-Route::get('create-room', [RoomController::class, 'createRoom']);
-Route::get('join-room/{pin}/{user}', [RoomController::class, 'joinRoom']);
-Route::get('stop/{user}', [RoomController::class, 'stop']);
+Route::group(['prefix' => '/categories'], function () {
+    Route::get('calculate', [CategoryController::class, 'calculate']);
+    Route::get('calculate-total', [CategoryController::class, 'calculateTotal']);
+    Route::get('results', [CategoryController::class, 'getResultsByCategory']);
+    Route::get('delete', [CategoryController::class, 'deleteSession']);
+    Route::get('random', [CategoryController::class, 'generateLetter']);
+});
+
+Route::group(['prefix' => '/room'], function (){
+    Route::get('create', [RoomController::class, 'createRoom']);
+    Route::get('join/{pin}/{user}', [RoomController::class, 'joinRoom']);
+    Route::get('stop/{user}', [RoomController::class, 'stop']);
+});
+
