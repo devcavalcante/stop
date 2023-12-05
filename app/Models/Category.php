@@ -7,9 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use MongoDB\Laravel\Eloquent\Model;
 
-class User extends Model
+class Category extends Authenticatable
 {
     use HasFactory, Notifiable;
 
@@ -19,10 +18,11 @@ class User extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'room_id',
+        'word',
+        'category',
+        'points',
+        'user'
     ];
 
-    protected $collection = 'users';
-    protected $connection = 'mongodb';
+    protected $table = 'rooms';
 }

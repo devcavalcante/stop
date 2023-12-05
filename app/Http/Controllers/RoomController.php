@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Events\JoinRoomMessage;
 use App\Events\StopMessage;
+use App\Models\Room;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 
 class RoomController extends Controller
@@ -11,13 +13,16 @@ class RoomController extends Controller
     public function createRoom(): JsonResponse
     {
         $pin = $this->generatePin();
-        return response()->json(['pin' => $pin]);
+        $pin = Room::create(['pin' => $pin]);
+        return response()->json($pin);
     }
 
     public function joinRoom($pin, $user): JsonResponse
     {
+        $room = Room::where(['pin' => (int) $pin])->first();
+        $created = User::create(['room_id' => $room->id, 'name' => $user]);
         JoinRoomMessage::dispatch($user, $pin);
-        return response()->json(['pin' => $pin, 'users' => $user]);
+        return response()->json($created);
     }
 
     public function stop($user): JsonResponse

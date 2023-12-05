@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use MongoDB\Laravel\Eloquent\Model;
 
-class User extends Model
+class Room extends Model
 {
     use HasFactory, Notifiable;
 
@@ -19,10 +19,9 @@ class User extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'room_id',
+        'pin',
     ];
 
-    protected $collection = 'users';
+    protected $collection = 'rooms';
     protected $connection = 'mongodb';
 }

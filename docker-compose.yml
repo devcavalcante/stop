@@ -14,7 +14,20 @@ services:
                 XDEBUG_HANDLER: ${XDEBUG_HANDLER}
         volumes:
             - ./:/app
+        depends_on:
+            - stop.db
 
+    stop.db:
+        container_name: stop.db
+        image: postgres:latest
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: stop
+            PGDATA: /docker/dbdata
+        volumes:
+            - ./docker/dbdata:/var/lib/postgresql/data
+            - ./docker/pgsql:/docker-entrypoint-initdb.d
     nginx:
         container_name: nginx
         build: docker/nginx
@@ -25,6 +38,23 @@ services:
             - ./:/app
         depends_on:
             - stop.dev
+
+    mongo:
+        container_name: mongo
+        image: mongo:latest
+        command: mongod --maxConns 10000
+        volumes:
+            - mongo:/data/db
+        ports:
+            - "27060:27017"
+        networks:
+            - bubble
+        environment:
+            TZ: America/Sao_Paulo
+            MONGO_INITDB_DATABASE: stop
+
+volumes:
+    mongo:
 
 networks:
     bubble:
