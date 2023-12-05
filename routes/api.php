@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get('health', function () {
+    return response('ok');
+});
 
 Route::group(['prefix' => '/categories'], function () {
     Route::get('calculate', [CategoryController::class, 'calculate']);
