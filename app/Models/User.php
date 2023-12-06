@@ -20,7 +20,7 @@ class User extends Model
      */
     protected $fillable = [
         'name',
-        'room_id',
+        'pin',
     ];
 
     protected $collection = 'users';

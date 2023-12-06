@@ -30,7 +30,7 @@ Route::group(['prefix' => '/categories'], function () {
 
 Route::group(['prefix' => '/room'], function (){
     Route::get('create', [RoomController::class, 'createRoom']);
-    Route::get('users', [RoomController::class, 'users']);
+    Route::get('users/{pin}', [RoomController::class, 'users']);
     Route::get('join/{pin}/{user}', [RoomController::class, 'joinRoom']);
     Route::get('stop/{user}', [RoomController::class, 'stop']);
 });

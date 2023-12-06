@@ -17,9 +17,9 @@ class RoomController extends Controller
         return response()->json($pin);
     }
 
-    public function users($pin)
+    public function users($pin): JsonResponse
     {
-        $room = Room::where(['pin' => (int) $pin])->get();
+        $room = User::where(['pin' => $pin])->get();
         return response()->json($room);
     }
 
@@ -27,7 +27,7 @@ class RoomController extends Controller
     {
         $room = Room::where(['pin' => (int) $pin])->first();
         if(!is_null($room)) {
-            $created = User::create(['room_id' => $room->id, 'name' => $user]);
+            $created = User::create(['pin' => $pin, 'name' => $user]);
             event(new JoinRoomMessage($user, $pin));
             return response()->json($created);
         }

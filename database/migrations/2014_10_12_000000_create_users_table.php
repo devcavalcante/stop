@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('users', function ($collection) {
             $collection->id();
             $collection->string('name');
-            $collection->int('room_id');
+            $collection->int('pin');
         });
     }
 
