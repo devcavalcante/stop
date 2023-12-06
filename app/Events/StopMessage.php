@@ -22,8 +22,13 @@ class StopMessage implements ShouldBroadcast
         $this->userName = $userName;
     }
 
-    public function broadcastOn(): Channel
+    public function broadcastOn()
     {
-        return new Channel('user.' . $this->userName);
+        return ['stop'];
+    }
+
+    public function broadcastAs()
+    {
+        return 'stop';
     }
 }
