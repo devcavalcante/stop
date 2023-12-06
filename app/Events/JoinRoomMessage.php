@@ -26,7 +26,7 @@ class JoinRoomMessage implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new Channel('join-room');
+        return 'join-room';
     }
 
     public function broadcastAs()
