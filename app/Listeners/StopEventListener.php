@@ -12,10 +12,8 @@ class StopEventListener implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    public function handle(StopMessage $event): void
+    public function handle(): void
     {
-        Log::info('Evento Stop recebido:', [
-            'userName' => $event->userName,
-        ]);
+        Log::info('Evento Stop recebido:');
     }
 }
