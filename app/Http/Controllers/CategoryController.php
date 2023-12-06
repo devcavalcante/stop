@@ -5,92 +5,118 @@ namespace App\Http\Controllers;
 use App\Events\LetterMessage;
 use App\Events\StopMessage;
 use App\Models\Result;
+use App\Models\ResultFinal;
 use App\Models\Room;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Session;
 
 class CategoryController extends Controller
 {
     /**
      * @throws GuzzleException
      */
-    public function calculate(Request $request, $pin): JsonResponse
+    public function calculate($pin): JsonResponse
     {
+        $getResults = $this->getResultsAndTransform(Result::where(['pin' => $pin])->get()->toArray());
         $client = new Client();
         $apiKey = env('API_KEY');
-        $category = Arr::get($request->all(), 'category');
-        $letter = strtolower(Arr::get($request->all(), 'letter'));
-        $userResult = [];
+        foreach ($getResults as $finalResult) {
+            $category = Arr::get($finalResult, 'category');
+            $letter = strtolower(Arr::get($finalResult, 'letter'));
+            $userResult = [];
 
-        if($category == 'animals' || $category == 'country' || $category == 'celebrity') {
-            $results = Arr::get($request->all(), 'data');
-            foreach ($results as $result) {
-                $word = strtolower(Arr::get($result, 'word'));
-                $user = Arr::get($result, 'user');
+            if ($category == 'animals' || $category == 'country' || $category == 'celebrity') {
+                $results = Arr::get($finalResult, 'data');
+                foreach ($results as $result) {
+                    $word = strtolower(Arr::get($result, 'word'));
+                    $user = Arr::get($result, 'user');
 
-                $response = $client->get(sprintf('https://api.api-ninjas.com/v1/%s?name=%s', $category, $word), [
-                    'headers' => [
-                        'x-api-key' => $apiKey,
-                    ],
-                ]);
+                    $response = $client->get(sprintf('https://api.api-ninjas.com/v1/%s?name=%s', $category, $word), [
+                        'headers' => [
+                            'x-api-key' => $apiKey,
+                        ],
+                    ]);
 
-                $response = json_decode($response->getBody()->getContents(), true);
-                $userResult[$category][] = $this->checkAnswers($response, $results, $user, $word, $category, $letter);
+                    $response = json_decode($response->getBody()->getContents(), true);
+                    $userResult[$category][] = $this->checkAnswers(
+                        $response,
+                        $results,
+                        $user,
+                        $word,
+                        $category,
+                        $letter
+                    );
+                }
             }
-        }
 
-        if($category == 'verbs' || $category == 'fruits' ||
-            $category == 'professions' || $category == 'bodyParts' ||
-            $category == 'objects'
-        ) {
-            $results = Arr::get($request->all(), 'data');
-            foreach ($results as $result) {
-                $word = strtolower(Arr::get($result, 'word'));
-                $user = Arr::get($result, 'user');
-                $path = storage_path(sprintf('/app/json/%s.json', $category));
-                $json = json_decode(file_get_contents($path), true);
+            if ($category == 'verbs' || $category == 'fruits' ||
+                $category == 'professions' || $category == 'bodyParts' ||
+                $category == 'objects'
+            ) {
+                $results = Arr::get($finalResult, 'data');
+                foreach ($results as $result) {
+                    $word = strtolower(Arr::get($result, 'word'));
+                    $user = Arr::get($result, 'user');
+                    $path = storage_path(sprintf('/app/json/%s.json', $category));
+                    $json = json_decode(file_get_contents($path), true);
 
-                $response = Arr::where($json[$category], function ($value) use ($word) {
-                    return strtolower($value['name']) == $word;
-                });
+                    $response = Arr::where($json[$category], function ($value) use ($word) {
+                        return strtolower($value['name']) == $word;
+                    });
 
-                $userResult[] = $this->checkAnswers($response, $results, $user, $word, $category, $letter);
+                    $userResult[$category][] = $this->checkAnswers($response, $results, $user, $word, $category, $letter);
+                }
             }
+
+            $userResults[] = $userResult;
+
         }
-
-        $userResult = Result::create(['category' => $userResult, 'pin' => $pin]);
-
+        $userResult = ResultFinal::create(['category' => $userResults, 'pin' => $pin]);
         return response()->json($userResult);
+    }
+
+    public function saveResults(Request $request, $pin): JsonResponse
+    {
+        $data = array_merge($request->all(), ['pin' => $pin]);
+        $resultRound = Result::create($data);
+        return response()->json($resultRound);
     }
 
     public function getResultsByCategory($pin): array
     {
-        return Result::where(['pin' => $pin])->get()->toArray();
+        return ResultFinal::where(['pin' => $pin])->get()->toArray();
     }
 
     public function calculateTotal($pin): JsonResponse
     {
         $results = $this->getResultsByCategory($pin);
-        $userPoints = [];
+        $sumPointsUser = [];
 
-        foreach ($results as $category => $categoryResults) {
-            foreach ($categoryResults['category'] as $result) {
-                $user = $result['user'];
-                $points = $result['points'];
+        foreach ($results as $item) {
+            foreach ($item['category'] as $category) {
+                foreach ($category as $words) {
+                    if (!is_array($words)) {
+                        continue;
+                    }
 
-                if (!isset($userPoints[$user])) {
-                    $userPoints[$user] = 0;
+                    foreach ($words as $word) {
+                        $user = $word['user'];
+                        $points = $word['points'];
+
+                        if (!isset($sumPointsUser[$user])) {
+                            $sumPointsUser[$user] = 0;
+                        }
+
+                        $sumPointsUser[$user] += $points;
+                    }
                 }
-
-                $userPoints[$user] += $points;
             }
         }
 
-        return response()->json($userPoints);
+        return response()->json($sumPointsUser);
     }
 
     public function generateLetter(): JsonResponse
@@ -136,5 +162,35 @@ class CategoryController extends Controller
             $userResult = ['user' => $user, 'points' => 0, 'word' => $word, 'category' => $category];
         }
         return $userResult;
+    }
+
+    private function getResultsAndTransform($data)
+    {
+        $resultArray = [];
+
+        foreach ($data as $item) {
+            $letter = $item['letter'];
+
+            foreach ($item['data'] as $dataItem) {
+                $category = $dataItem['category'];
+                $word = $dataItem['word'];
+                $user = $item['user'];
+
+                if (!isset($resultArray[$category])) {
+                    $resultArray[$category] = [
+                        'category' => $category,
+                        'letter' => $letter,
+                        'data' => [],
+                    ];
+                }
+
+                $resultArray[$category]['data'][] = [
+                    'word' => $word,
+                    'user' => $user,
+                ];
+            }
+        }
+
+        return array_values($resultArray);
     }
 }
