@@ -28,7 +28,7 @@ class RoomController extends Controller
         $room = Room::where(['pin' => (int) $pin])->first();
         if(!is_null($room)) {
             $created = User::create(['pin' => $pin, 'name' => $user]);
-            broadcast(new JoinRoomMessage($user, $pin))->toOthers();
+            event(new JoinRoomMessage($user, $pin));
             return response()->json($created);
         }
         return response()->json(['message' => 'Sala não encontrada']);
