@@ -26,6 +26,10 @@ class RoomController extends Controller
     public function joinRoom($pin, $user): JsonResponse
     {
         $room = Room::where(['pin' => (int) $pin])->first();
+        $userEntry = User::where(['pin' => $pin])->first();
+        if($userEntry->count() >= 5){
+            return response()->json(['message' => 'Atingiu o maximo de usuários']);
+        }
         if(!is_null($room)) {
             $created = User::create(['pin' => $pin, 'name' => $user]);
             event(new JoinRoomMessage($user, $pin));
