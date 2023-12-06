@@ -31,7 +31,7 @@ class JoinRoomMessage implements ShouldBroadcast
 
     public function broadcastAs()
     {
-        return 'join-room';
+        return new Channel('join-room');
     }
 
     public function broadcastWith()
