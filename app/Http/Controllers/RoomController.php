@@ -27,7 +27,7 @@ class RoomController extends Controller
     {
         $room = Room::where(['pin' => (int) $pin])->first();
         $userEntry = User::where(['pin' => $pin])->first();
-        if($userEntry->count() >= 5){
+        if(!is_null($userEntry) && $userEntry->count() >= 5){
             return response()->json(['message' => 'Atingiu o maximo de usuários']);
         }
         if(!is_null($room)) {
