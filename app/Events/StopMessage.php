@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -30,5 +29,12 @@ class StopMessage implements ShouldBroadcast
     public function broadcastAs()
     {
         return 'stop';
+    }
+
+    public function broadcastWith()
+    {
+        return [
+            'user' => $this->userName
+        ];
     }
 }
