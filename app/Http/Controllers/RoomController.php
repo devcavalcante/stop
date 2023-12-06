@@ -40,7 +40,7 @@ class RoomController extends Controller
 
     public function stop($user): JsonResponse
     {
-        StopMessage::dispatch($user);
+        event(new StopMessage($user));
         return response()->json(['message' => sprintf('Usuario apertou stop => %s', $user)]);
     }
 

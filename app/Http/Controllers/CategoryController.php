@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\LetterMessage;
+use App\Events\StopMessage;
 use App\Models\Result;
 use App\Models\Room;
 use GuzzleHttp\Client;
@@ -95,6 +97,7 @@ class CategoryController extends Controller
     {
         $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $randomLetter = $alphabet[rand(0, strlen($alphabet) - 1)];
+        event(new LetterMessage($randomLetter));
         return response()->json(['letter' => $randomLetter]);
     }
 
