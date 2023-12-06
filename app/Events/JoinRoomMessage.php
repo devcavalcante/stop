@@ -28,4 +28,9 @@ class JoinRoomMessage implements ShouldBroadcast
     {
         return new Channel('sala.' . $this->pin);
     }
+
+    public function broadcastAs()
+    {
+        return 'join-room';
+    }
 }
