@@ -29,12 +29,6 @@ return [
     */
 
     'connections' => [
-
-        'options' => [
-            'cluster' => 'mt1',
-            'useTLS' => true
-        ],
-
         'ably' => [
             'driver' => 'ably',
             'key' => env('ABLY_KEY'),
@@ -59,8 +53,8 @@ return [
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'encrypted' => true,
+                'cluster' => 'mt1',
+                'useTLS' => true
             ],
         ],
 
