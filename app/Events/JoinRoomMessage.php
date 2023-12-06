@@ -37,8 +37,9 @@ class JoinRoomMessage implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'userName' => $this->userName,
-            'pin' => $this->pin,
+            'data' => [
+                $this->userName,
+            ],
         ];
     }
 }
