@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\JoinRoomMessage;
+use App\Events\StartMessage;
 use App\Events\StopMessage;
 use App\Models\Room;
 use App\Models\User;
@@ -38,10 +39,16 @@ class RoomController extends Controller
         return response()->json(['message' => 'Sala não encontrada']);
     }
 
-    public function stop($user): JsonResponse
+    public function stop(): JsonResponse
     {
-        event(new StopMessage($user));
-        return response()->json(['message' => sprintf('Usuario apertou stop => %s', $user)]);
+        event(new StopMessage());
+        return response()->json(['message' => 'Usuario apertou stop']);
+    }
+
+    public function start(): JsonResponse
+    {
+        event(new StartMessage());
+        return response()->json(['message' => 'Usuario iniciou o jogo']);
     }
 
     private function generatePin(): int
