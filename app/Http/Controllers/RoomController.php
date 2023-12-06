@@ -17,6 +17,12 @@ class RoomController extends Controller
         return response()->json($pin);
     }
 
+    public function users($pin)
+    {
+        $room = Room::where(['pin' => (int) $pin])->get();
+        return response()->json($room);
+    }
+
     public function joinRoom($pin, $user): JsonResponse
     {
         $room = Room::where(['pin' => (int) $pin])->first();
