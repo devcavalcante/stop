@@ -21,8 +21,8 @@ Route::get('', function () {
 });
 
 Route::group(['prefix' => '/categories'], function () {
-    Route::get('calculate', [CategoryController::class, 'calculate']);
-    Route::get('calculate-total', [CategoryController::class, 'calculateTotal']);
+    Route::get('calculate/{pin}', [CategoryController::class, 'calculate']);
+    Route::get('calculate-total/{pin}', [CategoryController::class, 'calculateTotal']);
     Route::get('results', [CategoryController::class, 'getResultsByCategory']);
     Route::get('delete', [CategoryController::class, 'deleteSession']);
     Route::get('random', [CategoryController::class, 'generateLetter']);

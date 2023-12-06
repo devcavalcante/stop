@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Result;
+use App\Models\Room;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +16,7 @@ class CategoryController extends Controller
     /**
      * @throws GuzzleException
      */
-    public function calculate(Request $request): JsonResponse
+    public function calculate(Request $request, $pin): JsonResponse
     {
         $client = new Client();
         $apiKey = env('API_KEY');
@@ -54,31 +56,27 @@ class CategoryController extends Controller
                     return strtolower($value['name']) == $word;
                 });
 
-                $userResult[$category][] = $this->checkAnswers($response, $results, $user, $word, $category, $letter);
+                $userResult[] = $this->checkAnswers($response, $results, $user, $word, $category, $letter);
             }
         }
 
-        $sessionKey = 'resultsByCategory';
-        $sessionResults = session($sessionKey, []);
-        $sessionResults = array_merge_recursive($sessionResults, $userResult);
-        session([$sessionKey => $sessionResults]);
+        $userResult = Result::create(['category' => $userResult, 'pin' => $pin]);
 
         return response()->json($userResult);
     }
 
-    public function getResultsByCategory(): array
+    public function getResultsByCategory($pin): array
     {
-        $sessionKey = 'resultsByCategory';
-        return session($sessionKey, []);
+        return Result::where(['pin' => $pin])->get()->toArray();
     }
 
-    public function calculateTotal(): JsonResponse
+    public function calculateTotal($pin): JsonResponse
     {
-        $results = $this->getResultsByCategory();
+        $results = $this->getResultsByCategory($pin);
         $userPoints = [];
 
         foreach ($results as $category => $categoryResults) {
-            foreach ($categoryResults as $result) {
+            foreach ($categoryResults['category'] as $result) {
                 $user = $result['user'];
                 $points = $result['points'];
 
@@ -91,11 +89,6 @@ class CategoryController extends Controller
         }
 
         return response()->json($userPoints);
-    }
-
-    public function deleteSession(): void
-    {
-        session()->forget('resultsByCategory');
     }
 
     public function generateLetter(): JsonResponse
